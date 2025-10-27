@@ -44,7 +44,7 @@ early_stop = EarlyStopping(
 lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
     factor=0.5,
-    patience=5,     
+    patience=4,     
     min_lr=1e-6,
     verbose=1
 )
@@ -61,8 +61,8 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
 	X_train, y_train,
 	validation_data=(X_val, y_val),
-	epochs=15,
-	batch_size=64,
+	epochs=20,
+	batch_size=128,
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )

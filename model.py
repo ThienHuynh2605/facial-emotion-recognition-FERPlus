@@ -71,7 +71,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = FireB(x, s=32, e=64)
     x = FireA(x, s=64, e=128)
     x = FireB(x, s=64, e=128)
-    x = Dropout(0.1)(x)
+    x = Dropout(0.2)(x)
 
     # Final conv layers
     x = Conv2D(32, (3,3), padding="same")(x)
