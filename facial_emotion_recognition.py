@@ -1,10 +1,7 @@
-import os
-import cv2
 import numpy as np
-import pandas as pd
 import tensorflow as tf
-from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from loadData import loadData
 from model import build_model
@@ -12,12 +9,26 @@ from model import build_model
 
 emotion_classes = ["neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt"]
 #-----------------------------------------------------------------------------------
+
 X_train, y_train = loadData("FER2013Train")
 X_val, y_val     = loadData("FER2013Valid")
 X_test, y_test   = loadData("FER2013Test")
 print(X_train.shape, y_train.shape)
 print(X_val.shape, y_val.shape)
 print(X_test.shape, y_test.shape)
+#-----------------------------------------------------------------------------------
+
+train_datagen = ImageDataGenerator(
+    rotation_range=10,
+    zoom_range=0.05,
+    width_shift_range=0.05,
+    height_shift_range=0.05,
+    brightness_range=[0.95, 1.05],
+    horizontal_flip=True
+)
+
+# val_datagen = ImageDataGenerator()
+#-----------------------------------------------------------------------------------
 
 num_classes = y_train.shape[1]
 print("Number of classes:", num_classes)
@@ -58,17 +69,18 @@ checkpoint = ModelCheckpoint(
 )
 
 #-----------------------------------------------------------------------------------
+batch_size = 128
 history = model.fit(
-	X_train, y_train,
-	validation_data=(X_val, y_val),
-	epochs=20,
-	batch_size=128,
+    train_datagen.flow(X_train, y_train, batch_size=batch_size),
+    validation_data=(X_val, y_val),  # Hoặc dùng val_datagen.flow(X_val, y_val, batch_size=128)
+    epochs=20,
+    steps_per_epoch=len(X_train) // batch_size, 
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )
 
 #------------------------------------------------------------------------------------
-test_loss, test_acc = model.evaluate(X_test, y_test)
+test_loss, test_acc = model.evaluate(X_test, y_test, batch_size=batch_size)
 print("Test Accuracy:", test_acc)
 
 #------------------------------------------------------------------------------------
