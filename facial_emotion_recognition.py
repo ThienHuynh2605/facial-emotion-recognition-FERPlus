@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import (RandomFlip, RandomRotation, RandomZoom, RandomTranslation, RandomContrast, RandomBrightness)
 
 from loadData import loadData
 from model import build_model
@@ -18,14 +18,14 @@ print(X_val.shape, y_val.shape)
 print(X_test.shape, y_test.shape)
 #-----------------------------------------------------------------------------------
 
-train_datagen = ImageDataGenerator(
-    rotation_range=10,
-    zoom_range=0.05,
-    width_shift_range=0.05,
-    height_shift_range=0.05,
-    brightness_range=[0.95, 1.05],
-    horizontal_flip=True
-)
+data_augmentation = tf.keras.Sequential([
+    RandomFlip("horizontal"),
+    RandomRotation(0.03),           # 0.03 * 2π ≈ 10 độ
+    RandomZoom(0.05),
+    RandomTranslation(0.05, 0.05),
+    RandomContrast(0.05),
+    RandomBrightness(0.05)
+], name='data_augmentation')
 
 # val_datagen = ImageDataGenerator()
 #-----------------------------------------------------------------------------------
@@ -69,19 +69,35 @@ checkpoint = ModelCheckpoint(
 )
 
 #-----------------------------------------------------------------------------------
-batch_size = 128
+BATCH_SIZE = 128
+
+train_ds = tf.data.Dataset.from_tensor_slices((X_train, y_train))
+train_ds = train_ds.shuffle(buffer_size=1000)
+train_ds = train_ds.batch(BATCH_SIZE)
+train_ds = train_ds.map(
+    lambda x, y: (data_augmentation(x, training=True), y),
+    num_parallel_calls=tf.data.AUTOTUNE
+)
+
+val_ds = tf.data.Dataset.from_tensor_slices((X_val, y_val))
+val_ds = val_ds.batch(BATCH_SIZE)
+val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+
 history = model.fit(
-    train_datagen.flow(X_train, y_train, batch_size=batch_size),
-    validation_data=(X_val, y_val),  # Hoặc dùng val_datagen.flow(X_val, y_val, batch_size=128)
+    train_ds,
+    validation_data=val_ds,
     epochs=20,
-    steps_per_epoch=len(X_train) // batch_size, 
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )
 
 #------------------------------------------------------------------------------------
-test_loss, test_acc = model.evaluate(X_test, y_test, batch_size=batch_size)
-print("Test Accuracy:", test_acc)
+# Evaluate
+test_ds = tf.data.Dataset.from_tensor_slices((X_test, y_test))
+test_ds = test_ds.batch(BATCH_SIZE)
+test_loss, test_accuracy = model.evaluate(test_ds)
+print(f"Test Accuracy: {test_accuracy:.4f}")
 
 #------------------------------------------------------------------------------------
 sample_idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
