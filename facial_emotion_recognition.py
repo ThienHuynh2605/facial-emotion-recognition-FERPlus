@@ -36,7 +36,8 @@ model.summary()
 early_stop = EarlyStopping(
         monitor='val_loss',
         patience=10,
-        restore_best_weights=True
+        restore_best_weights=True,
+        verbose=1
 )
 
 #-----------------------------------------------------------------------------------
@@ -44,7 +45,8 @@ lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
     factor=0.5,
     patience=5,     
-    min_lr=1e-6
+    min_lr=1e-6,
+    verbose=1
 )
 
 #---------------------------------------------------------------------------------
@@ -52,7 +54,7 @@ checkpoint = ModelCheckpoint(
     "best_model.keras",
     monitor="val_loss",     
     save_best_only=True,
-    verbose=2
+    verbose=1
 )
 
 #-----------------------------------------------------------------------------------

@@ -79,7 +79,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = ReLU()(x)
 
     x = Conv2D(num_classes, (1,1), padding="same")(x)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.4)(x)
 
     # GAP + Softmax
     x = GlobalAveragePooling2D()(x)
