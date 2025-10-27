@@ -83,7 +83,7 @@ true_emotions = [emotion_classes[i] for i in true_class]
 
 print("\nPrediction results vs Ground Truth:")
 for i, pred_emo, true_emo in zip(sample_idx, pred_emotions, true_emotions):
-    print(f"Sample {i}: Predicted = {pred_emo}, True = {true_emo}")
+    print(f"Sample {i}: Predicted = {pred_emo}, {pred_emo==true_emo} = {true_emo}")
 
 
 
