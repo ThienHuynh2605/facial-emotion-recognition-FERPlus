@@ -57,7 +57,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     # x = RandomZoom(0.1)(x)              
     # x = RandomTranslation(0.1,0.1)(x)   
     # x = RandomContrast(0.1)(x)      
-    x = RandomBrightness(0.1)(x)  
+    # x = RandomBrightness(0.1)(x)  
 
     # First Conv
     x = Conv2D(64, (3,3), padding="same")(x)
