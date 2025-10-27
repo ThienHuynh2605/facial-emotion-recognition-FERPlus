@@ -42,6 +42,8 @@ def loadData(split = "FER2013Train"):
     images_name = df.iloc[:, 0].values
     df_values = df.iloc[:, 2:].astype(float).values
     df_values[df_values == 1] = 0
+
+    size = df_values.shape[1]
     emotion_unknown = np.zeros(size)
     emotion_unknown[-2] = 1.0
     filtered = np.array([process_data(row, emotion_unknown) for row in df_values])
