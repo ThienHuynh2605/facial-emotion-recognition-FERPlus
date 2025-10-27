@@ -20,10 +20,10 @@ print(X_test.shape, y_test.shape)
 
 data_augmentation = tf.keras.Sequential([
     RandomFlip("horizontal"),
-    RandomRotation(0.02),           # 0.03 * 2π ≈ 10 độ
+    # RandomRotation(0.02),           # 0.03 * 2π ≈ 10 độ
     # RandomZoom(0.05),
-    RandomTranslation(0.01, 0.01),
-    RandomContrast(0.03),
+    # RandomTranslation(0.01, 0.01),
+    # RandomContrast(0.03),
     RandomBrightness(0.01)
 ], name='data_augmentation')
 
