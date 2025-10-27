@@ -53,11 +53,11 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     inputs = Input(shape=input_shape)
 
     x = RandomFlip("horizontal")(inputs)
-    x = RandomRotation(0.1)(x)      
+    # x = RandomRotation(0.1)(x)      
     # x = RandomZoom(0.1)(x)              
     # x = RandomTranslation(0.1,0.1)(x)   
     # x = RandomContrast(0.1)(x)      
-    # x = RandomBrightness(0.1)(x)  
+    x = RandomBrightness(0.1)(x)  
 
     # First Conv
     x = Conv2D(64, (3,3), padding="same")(x)
