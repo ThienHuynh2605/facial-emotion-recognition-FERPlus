@@ -1,6 +1,14 @@
-from tensorflow.keras.layers import Input, Conv2D, BatchNormalization, ReLU, GlobalAveragePooling2D, Concatenate, Activation, Dropout, RandomFlip, RandomRotation, RandomZoom, RandomTranslation,RandomContrast, RandomBrightness
-from tensorflow.keras.models import Model
 import tensorflow as tf
+from tensorflow.keras import Model, Input
+from tensorflow.keras.layers import (
+    Conv2D, BatchNormalization, ReLU, GlobalAveragePooling2D,
+    Concatenate, Activation, Dropout
+)
+from tensorflow.keras.layers import (
+    RandomFlip, RandomRotation, RandomZoom, RandomTranslation,
+    RandomContrast, RandomBrightness
+)
+
 
 #------------------------------------------------------------------------------------------
 def FireA(x, s, e):

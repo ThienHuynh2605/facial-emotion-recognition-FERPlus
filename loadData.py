@@ -2,37 +2,41 @@ import os
 import pandas as pd
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
-def process_data(emotion_raw, emotion_unknown):
-    emotion_raw = emotion_raw.copy()
-    sum_list = sum(emotion_raw)
-    
-    emotion = np.zeros_like(emotion_raw)
-    sum_part = 0
-    count = 0
-    valid_emotion = True
+def process_data(emotion_raw):
     size = len(emotion_raw)
+    emotion_unknown = [0.0]*size
+    emotion_unknown[-2] = 1.0
+
+    # remove emotions with a single vote (outlier removal) 
+    for i in range(size):
+        if emotion_raw[i] < 1.0 + np.finfo(float).eps:
+            emotion_raw[i] = 0.0
     
-    while sum_part < 0.75 * sum_list and count < 3 and valid_emotion:
-        maxval = max(emotion_raw)
-        for i in range(size):
-            if emotion_raw[i] == maxval:
+    sum_list = sum(emotion_raw)
+    emotion  = [0.0]*size
+    sum_part = 0
+    count    = 0
+    valid_emotion = True
+    while sum_part < 0.75*sum_list and count < 3 and valid_emotion:
+        maxval = max(emotion_raw) 
+        for i in range(size): 
+            if emotion_raw[i] == maxval: 
                 emotion[i] = maxval
                 emotion_raw[i] = 0
                 sum_part += emotion[i]
                 count += 1
-                if i >= 8:  # unknown hoặc non-face
+                if i >= 8:  # unknown or non-face share same number of max votes 
                     valid_emotion = False
-                    if sum(emotion) > maxval:
+                    if sum(emotion) > maxval:   # there have been other emotions ahead of unknown or non-face
                         emotion[i] = 0
                         count -= 1
                     break
-        if sum(emotion) <= 0.5 * sum_list or count > 3:
-            emotion = emotion_unknown.copy()  
-    return [float(i)/sum(emotion) for i in emotion]
+    if sum(emotion) <= 0.5*sum_list or count > 3: # less than 50% of the votes are integrated, or there are too many emotions, we'd better discard this example
+        emotion = emotion_unknown   # force setting as unknown
+    return np.array(emotion, dtype=float)
 
-def loadData(split = "FER2013Train"):
+def loadData(split="FER2013Train"):
     current_path = os.getcwd()
     data_path = os.path.join(current_path, "dataset")
     label_path = os.path.join(data_path, "Labels", split, "label.csv")
@@ -41,31 +45,25 @@ def loadData(split = "FER2013Train"):
     images_path = os.path.join(data_path, "Images", split)
     images_name = df.iloc[:, 0].values
     df_values = df.iloc[:, 2:].astype(float).values
-    df_values[df_values == 1] = 0
 
-    size = df_values.shape[1]
-    emotion_unknown = np.zeros(size)
-    emotion_unknown[-2] = 1.0
-    filtered = np.array([process_data(row, emotion_unknown) for row in df_values])
-    
-    labels = []
-    for i in filtered:
-        idx = np.random.choice(len(i), p=i)
-        new_targets = np.zeros_like(i)
-        new_targets[idx] = 1.0
-        labels.append(new_targets)
+    X, labels = [], []
+    for name, row in zip(images_name, df_values):
+        emotion = process_data(list(row))
+        idx = np.argmax(emotion)
+        if idx < 8:
+            emotion = emotion[:-2] 
+            emotion = emotion / np.sum(emotion)  
+            labels.append(emotion)
+
+            path = os.path.join(images_path, name)
+            image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            if image is not None:
+                image = cv2.resize(image, (64, 64), interpolation=cv2.INTER_LINEAR)
+                image = image.astype("float32") / 255.0
+                X.append(image)
+
+    X = np.expand_dims(np.array(X), axis=-1)
     labels = np.array(labels)
-
-    X=[]
-    for name in images_name:
-        path = os.path.join(images_path, name)
-        image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        image_resize = cv2.resize(image, (64, 64), interpolation=cv2.INTER_LINEAR)
-        image_resize = image_resize.astype("float32")/255.0
-        X.append(image_resize)
-    X = np.array(X)
-    X = np.expand_dims(X, axis=-1)
-
     return X, labels
 
 
