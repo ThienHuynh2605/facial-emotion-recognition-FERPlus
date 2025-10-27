@@ -51,17 +51,18 @@ lr_scheduler = ReduceLROnPlateau(
 checkpoint = ModelCheckpoint(
     "best_model.keras",
     monitor="val_loss",     
-    save_best_only=True
+    save_best_only=True,
+    verbose=2
 )
 
 #-----------------------------------------------------------------------------------
 history = model.fit(
 	X_train, y_train,
 	validation_data=(X_val, y_val),
-	epochs=30,
+	epochs=15,
 	batch_size=64,
     callbacks=[early_stop, lr_scheduler, checkpoint],
-    verbose=2
+    verbose=1
 )
 
 #------------------------------------------------------------------------------------
