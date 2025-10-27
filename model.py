@@ -60,7 +60,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     # x = RandomBrightness(0.1)(x)  
 
     # First Conv
-    x = Conv2D(32, (3,3), padding="same")(x)
+    x = Conv2D(32, (3,3), padding="same")(inputs)
     x = BatchNormalization()(x)
     x = ReLU()(x)
 
