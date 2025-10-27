@@ -20,11 +20,11 @@ print(X_test.shape, y_test.shape)
 
 data_augmentation = tf.keras.Sequential([
     RandomFlip("horizontal"),
-    RandomRotation(0.03),           # 0.03 * 2π ≈ 10 độ
-    RandomZoom(0.05),
-    RandomTranslation(0.05, 0.05),
-    RandomContrast(0.05),
-    RandomBrightness(0.05)
+    RandomRotation(0.02),           # 0.03 * 2π ≈ 10 độ
+    # RandomZoom(0.05),
+    RandomTranslation(0.01, 0.01),
+    RandomContrast(0.03),
+    RandomBrightness(0.01)
 ], name='data_augmentation')
 
 # val_datagen = ImageDataGenerator()
@@ -36,7 +36,7 @@ print("Number of classes:", num_classes)
 #-----------------------------------------------------------------------------------
 model = build_model(input_shape=(64,64,1), num_classes=num_classes)
 model.compile(
-	optimizer=tf.keras.optimizers.Adam(1e-3),
+	optimizer=tf.keras.optimizers.Adam(1e-2),
 	loss='categorical_crossentropy',
 	metrics=['accuracy']
 )
@@ -46,7 +46,7 @@ model.summary()
 #-----------------------------------------------------------------------------------
 early_stop = EarlyStopping(
         monitor='val_loss',
-        patience=10,
+        patience=20,
         restore_best_weights=True,
         verbose=1
 )
@@ -55,8 +55,8 @@ early_stop = EarlyStopping(
 lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
     factor=0.5,
-    patience=4,     
-    min_lr=1e-6,
+    patience=5,     
+    min_lr=1e-5,
     verbose=1
 )
 
@@ -87,7 +87,7 @@ train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
 history = model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=20,
+    epochs=100,
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )
