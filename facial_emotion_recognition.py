@@ -25,10 +25,16 @@ print("Number of classes:", num_classes)
 
 #-----------------------------------------------------------------------------------
 model = build_model(input_shape=(64,64,1), num_classes=num_classes)
+epochs = 200
+lr_schedule = tf.keras.optimizers.schedules.CosineDecay(
+        initial_learning_rate=1e-3,
+        decay_steps=epochs * len(X_train),
+        alpha=1e-5
+)
 model.compile(
-	optimizer=tf.keras.optimizers.Adam(1e-3),
-	loss='categorical_crossentropy',
-	metrics=['accuracy']
+        optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+        loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
+        metrics=['accuracy']
 )
 
 model.summary()
@@ -36,7 +42,7 @@ model.summary()
 #-----------------------------------------------------------------------------------
 early_stop = EarlyStopping(
         monitor='val_loss',
-        patience=30,
+        patience=15,
         restore_best_weights=True,
         verbose=1
 )
@@ -44,8 +50,8 @@ early_stop = EarlyStopping(
 #-----------------------------------------------------------------------------------
 lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
-    factor=0.4,
-    patience=10,     
+    factor=0.5,
+    patience=7,     
     min_lr=1e-6,
     verbose=1
 )
@@ -62,7 +68,7 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
 	X_train, y_train,
 	validation_data=(X_val, y_val),
-	epochs=200,
+	epochs=epochs,
 	batch_size=32,
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
