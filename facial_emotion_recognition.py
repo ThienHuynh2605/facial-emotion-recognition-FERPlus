@@ -8,6 +8,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 
 from loadData import loadData
 from model import build_model
+from load_plotter import LossPlotter
 
 
 emotion_classes = ["neutral", "happiness", "surprise", "sadness", "anger", "disgust", "fear", "contempt"]
@@ -25,7 +26,7 @@ print("Number of classes:", num_classes)
 #-----------------------------------------------------------------------------------
 model = build_model(input_shape=(64,64,1), num_classes=num_classes)
 model.compile(
-	optimizer=tf.keras.optimizers.Adam(1e-2),
+	optimizer=tf.keras.optimizers.Adam(1e-3),
 	loss='categorical_crossentropy',
 	metrics=['accuracy']
 )
@@ -62,7 +63,7 @@ history = model.fit(
 	X_train, y_train,
 	validation_data=(X_val, y_val),
 	epochs=200,
-	batch_size=64,
+	batch_size=32,
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )
@@ -70,6 +71,10 @@ history = model.fit(
 #------------------------------------------------------------------------------------
 test_loss, test_acc = model.evaluate(X_test, y_test)
 print("Test Accuracy:", test_acc)
+
+#------------------------------------------------------------------------------------
+plotter = LossPlotter(history)
+plotter.plot() 
 
 #------------------------------------------------------------------------------------
 sample_idx = list(range(0, 21))
