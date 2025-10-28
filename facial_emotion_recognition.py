@@ -44,7 +44,7 @@ early_stop = EarlyStopping(
 #-----------------------------------------------------------------------------------
 lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
-    factor=0.7,
+    factor=0.4,
     patience=10,     
     min_lr=1e-6,
     verbose=1
