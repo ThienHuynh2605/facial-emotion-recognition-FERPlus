@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import (
     Conv2D, BatchNormalization, ReLU, GlobalAveragePooling2D,
-    Concatenate, Activation, Dropout
+    Concatenate, Activation, Dropout, MaxPooling2D
 )
 from tensorflow.keras.layers import (
     RandomFlip, RandomRotation, RandomZoom, RandomTranslation,
@@ -56,22 +56,29 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = Conv2D(64, (3,3), padding="same")(inputs)
     x = BatchNormalization()(x)
     x = ReLU()(x)
+    x = MaxPooling2D(2)(x)
 
     # Fire blocks
-    x = FireA(x, s=16, e=32)
-    x = FireB(x, s=16, e=32)
-    x = Dropout(0.1)(x)
     x = FireA(x, s=32, e=64)
     x = FireB(x, s=32, e=64)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.1)(x)
+    x = MaxPooling2D(2)(x)
+
     x = FireA(x, s=64, e=128)
     x = FireB(x, s=64, e=128)
     x = Dropout(0.3)(x)
+    x = MaxPooling2D(2)(x)
+
+    x = FireA(x, s=128, e=256)
+    x = FireB(x, s=128, e=256)
+    x = Dropout(0.3)(x)
+    x = MaxPooling2D(2)(x)
 
     # Final conv layers
     x = Conv2D(64, (3,3), padding="same")(x)
     x = BatchNormalization()(x)
     x = ReLU()(x)
+    x = MaxPooling2D(2)(x)
 
     x = Conv2D(num_classes, (1,1), padding="same")(x)
     x = Dropout(0.5)(x)
