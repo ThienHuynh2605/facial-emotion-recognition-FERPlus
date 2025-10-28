@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras import layers, models
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
 from loadData import loadData
@@ -26,20 +25,8 @@ print("Number of classes:", num_classes)
 #-----------------------------------------------------------------------------------
 model = build_model(input_shape=(64,64,1), num_classes=num_classes)
 epochs = 200
-initial_lr = 5e-4
-steps_per_epoch = len(X_train)
-total_steps = epochs * steps_per_epoch
-warmup_steps = 5 * steps_per_epoch  # 5 epochs warmup
-    
-def lr_schedule(step):
-    if step < warmup_steps:
-        return initial_lr * (step / warmup_steps)
-    else:
-        progress = (step - warmup_steps) / (total_steps - warmup_steps)
-        return initial_lr * 0.5 * (1 + tf.cos(3.14159 * progress))
-        
 model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
         loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
         metrics=['accuracy']
 )
@@ -55,13 +42,13 @@ early_stop = EarlyStopping(
 )
 
 #-----------------------------------------------------------------------------------
-# lr_scheduler = ReduceLROnPlateau(
-#     monitor='val_loss',
-#     factor=0.5,
-#     patience=7,     
-#     min_lr=1e-6,
-#     verbose=1
-# )
+lr_scheduler = ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.5,
+    patience=7,     
+    min_lr=1e-6,
+    verbose=1
+)
 
 #---------------------------------------------------------------------------------
 checkpoint = ModelCheckpoint(
@@ -77,7 +64,7 @@ history = model.fit(
 	validation_data=(X_val, y_val),
 	epochs=epochs,
 	batch_size=32,
-    callbacks=[early_stop, checkpoint],
+    callbacks=[lr_scheduler, early_stop, checkpoint],
     verbose=1
 )
 
