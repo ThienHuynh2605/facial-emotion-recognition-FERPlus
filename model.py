@@ -59,23 +59,19 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = BatchNormalization()(x)
     x = ReLU()(x)
     x = MaxPooling2D(2)(x)
-    x = Dropout(0.1)(x)
 
     # Fire blocks
     x = FireA(x, s=16, e=32, l2_reg=l2_reg)
-    x = Dropout(0.15)(x)
     x = FireB(x, s=16, e=32, l2_reg=l2_reg)
     x = Dropout(0.15)(x)
     x = MaxPooling2D(2)(x)
 
     x = FireA(x, s=32, e=64, l2_reg=l2_reg)
-    x = Dropout(0.2)(x)
     x = FireB(x, s=32, e=64, l2_reg=l2_reg)
     x = Dropout(0.2)(x)
     x = MaxPooling2D(2)(x)
 
     x = FireA(x, s=64, e=128, l2_reg=l2_reg)
-    x = Dropout(0.25)(x)
     x = FireB(x, s=64, e=128, l2_reg=l2_reg)
     x = Dropout(0.25)(x)
     x = MaxPooling2D(2)(x)
