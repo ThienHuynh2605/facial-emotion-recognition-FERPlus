@@ -32,8 +32,9 @@ total_steps = epochs * steps_per_epoch
 warmup_steps = 5 * steps_per_epoch 
     
 def lr_schedule(step):
+    min_lr = 1e-6  
     if step < warmup_steps:
-        return initial_lr * (step / warmup_steps)
+        return min_lr + (initial_lr - min_lr) * (step / warmup_steps)
     else:
         progress = (step - warmup_steps) / (total_steps - warmup_steps)
         return initial_lr * 0.5 * (1 + tf.cos(3.14159 * progress))
