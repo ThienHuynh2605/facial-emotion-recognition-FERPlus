@@ -73,21 +73,21 @@ def build_model(input_shape=(64,64,1), num_classes=8):
 
     x = FireA(x, s=64, e=128, l2_reg=l2_reg)
     x = FireB(x, s=64, e=128, l2_reg=l2_reg)
-    x = Dropout(0.25)(x)
+    x = Dropout(0.2)(x)
     x = MaxPooling2D(2)(x)
 
     # Final conv layers
-    x = Conv2D(256, (3,3), padding="same", kernel_regularizer=l2(l2_reg))(x)
+    x = Conv2D(64, (3,3), padding="same", kernel_regularizer=l2(l2_reg))(x)
     x = BatchNormalization()(x)
     x = ReLU()(x)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.2)(x)
 
     # GAP + Softmax
     x = GlobalAveragePooling2D()(x)
-    x = Dense(128, activation='relu', kernel_regularizer=l2(l2_reg))(x)
-    x = Dropout(0.4)(x)
-    x = Dense(64, activation='relu', kernel_regularizer=l2(l2_reg))(x)
-    x = Dropout(0.4)(x)
+    x = Dense(32, activation='relu', kernel_regularizer=l2(l2_reg))(x)
+    x = Dropout(0.2)(x)
+    x = Dense(16, activation='relu', kernel_regularizer=l2(l2_reg))(x)
+    x = Dropout(0.2)(x)
 
     outputs = Dense(num_classes, activation='softmax')(x)
 
