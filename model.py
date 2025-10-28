@@ -90,7 +90,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = Dense(64, activation='relu', kernel_regularizer=l2(l2_reg))(x)
     x = Dropout(0.5)(x)
 
-    outputs = tf.keras.layers.Activation("softmax")(x)
+    outputs = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs, outputs)
     
