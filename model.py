@@ -52,26 +52,21 @@ def FireB(x, s, e):
 def build_model(input_shape=(64,64,1), num_classes=8):
     inputs = Input(shape=input_shape)
 
-    x = RandomFlip("horizontal")(inputs)
-    # x = RandomRotation(0.1)(x)      
-    # x = RandomZoom(0.1)(x)              
-    # x = RandomTranslation(0.1,0.1)(x)   
-    # x = RandomContrast(0.1)(x)      
-    # x = RandomBrightness(0.1)(x)  
-
     # First Conv
-    x = Conv2D(64, (3,3), padding="same")(x)
+    x = Conv2D(64, (3,3), padding="same")(inputs)
     x = BatchNormalization()(x)
     x = ReLU()(x)
 
     # Fire blocks
     x = FireA(x, s=16, e=32)
     x = FireB(x, s=16, e=32)
+    x = Dropout(0.1)(x)
     x = FireA(x, s=32, e=64)
     x = FireB(x, s=32, e=64)
+    x = Dropout(0.3)(x)
     x = FireA(x, s=64, e=128)
     x = FireB(x, s=64, e=128)
-    x = Dropout(0.2)(x)
+    x = Dropout(0.3)(x)
 
     # Final conv layers
     x = Conv2D(64, (3,3), padding="same")(x)
@@ -79,7 +74,7 @@ def build_model(input_shape=(64,64,1), num_classes=8):
     x = ReLU()(x)
 
     x = Conv2D(num_classes, (1,1), padding="same")(x)
-    x = Dropout(0.4)(x)
+    x = Dropout(0.5)(x)
 
     # GAP + Softmax
     x = GlobalAveragePooling2D()(x)

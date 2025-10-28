@@ -25,7 +25,7 @@ print("Number of classes:", num_classes)
 #-----------------------------------------------------------------------------------
 model = build_model(input_shape=(64,64,1), num_classes=num_classes)
 model.compile(
-	optimizer=tf.keras.optimizers.Adam(1e-3),
+	optimizer=tf.keras.optimizers.Adam(1e-2),
 	loss='categorical_crossentropy',
 	metrics=['accuracy']
 )
@@ -35,7 +35,7 @@ model.summary()
 #-----------------------------------------------------------------------------------
 early_stop = EarlyStopping(
         monitor='val_loss',
-        patience=10,
+        patience=30,
         restore_best_weights=True,
         verbose=1
 )
@@ -43,8 +43,8 @@ early_stop = EarlyStopping(
 #-----------------------------------------------------------------------------------
 lr_scheduler = ReduceLROnPlateau(
     monitor='val_loss',
-    factor=0.5,
-    patience=4,     
+    factor=0.7,
+    patience=10,     
     min_lr=1e-6,
     verbose=1
 )
@@ -61,8 +61,8 @@ checkpoint = ModelCheckpoint(
 history = model.fit(
 	X_train, y_train,
 	validation_data=(X_val, y_val),
-	epochs=20,
-	batch_size=128,
+	epochs=200,
+	batch_size=64,
     callbacks=[early_stop, lr_scheduler, checkpoint],
     verbose=1
 )
@@ -72,7 +72,7 @@ test_loss, test_acc = model.evaluate(X_test, y_test)
 print("Test Accuracy:", test_acc)
 
 #------------------------------------------------------------------------------------
-sample_idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+sample_idx = list(range(0, 21))
 X_sample = X_test[sample_idx]
 y_sample = y_test[sample_idx]
 
